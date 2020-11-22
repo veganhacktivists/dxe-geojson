@@ -10,7 +10,7 @@ function toGeoJson(chapter) {
     type: "Feature",
     geometry: {
       type: "Point",
-      coordinates: [chapter.Lat, chapter.Lng],
+      coordinates: [chapter.Lng, chapter.Lat],
     },
     properties: chapter,
   };
