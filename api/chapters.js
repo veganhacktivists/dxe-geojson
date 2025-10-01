@@ -1,13 +1,13 @@
-import fetch from "node-fetch";
+import axios from "axios";
 import { toGeoJson } from "../lib/geojson";
 
 /**
  * Fetch DxE chapters and parse the response to JSON.
  */
 async function fetchChapters() {
-  const res = await fetch("https://adb.dxe.io/chapters");
+  const res = await axios.get("https://adb.dxe.io/chapters");
 
-  return res.json(res);
+  return res.data;
 }
 
 /**
