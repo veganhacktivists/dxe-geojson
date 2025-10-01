@@ -1,11 +1,12 @@
 import axios from "axios";
-import { toGeoJson } from "../lib/geojson";
+import { Request, Response } from "express";
+import { toGeoJson, Chapter } from "../lib/geojson";
 
 /**
  * Fetch DxE chapters and parse the response to JSON.
  */
-async function fetchChapters() {
-  const res = await axios.get("https://adb.dxe.io/chapters");
+async function fetchChapters(): Promise<Chapter[]> {
+  const res = await axios.get<Chapter[]>("https://adb.dxe.io/chapters");
 
   return res.data;
 }
@@ -17,7 +18,7 @@ async function fetchChapters() {
  * @param {Request} _req Standard HTTP request object
  * @param {Response} res Standard HTTP response object
  */
-export default async function getChapters(_req, res) {
+export default async function getChapters(_req: Request, res: Response) {
   try {
     const chapters = await fetchChapters();
     res.status(200).json(chapters.map(toGeoJson));
