@@ -1,0 +1,6 @@
+[phases.setup]
+nixpkgsArchive = '5b751d1b50366c18fc5ef7faa82f5d4d2b75ef47'
+nixpkgs = [
+  "nodejs_22",
+  "..."
+]
