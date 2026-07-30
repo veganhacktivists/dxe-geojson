@@ -2,11 +2,16 @@ import axios from "axios";
 import { Request, Response } from "express";
 import { toGeoJson, Chapter } from "../lib/geojson";
 
+/** Give up rather than hold the request open if the API stops responding. */
+const TIMEOUT_MS = 10_000;
+
 /**
  * Fetch DxE chapters and parse the response to JSON.
  */
 async function fetchChapters(): Promise<Chapter[]> {
-  const res = await axios.get<Chapter[]>("https://adb.dxe.io/chapters");
+  const res = await axios.get<Chapter[]>("https://adb.dxe.io/chapters", {
+    timeout: TIMEOUT_MS,
+  });
 
   return res.data;
 }

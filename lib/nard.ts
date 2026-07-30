@@ -6,6 +6,9 @@ const YEARS_PUBLISHED = 2;
 
 const SOURCE_URL = "https://thenard.org/";
 
+/** Give up rather than hold the request open if the source stops responding. */
+const TIMEOUT_MS = 10_000;
+
 /** The events map on thenard.org embeds its own config as JSON. */
 const CONFIG_PATTERN = /nard-year-explorer__config"[^>]*>(\{.*?\})<\/script>/s;
 
@@ -29,7 +32,10 @@ interface NardYear {
  * list of locations with coordinates, which is everything the map needs.
  */
 export async function fetchYears(): Promise<NardYear[]> {
-  const res = await axios.get<string>(SOURCE_URL, { responseType: "text" });
+  const res = await axios.get<string>(SOURCE_URL, {
+    responseType: "text",
+    timeout: TIMEOUT_MS,
+  });
   const match = CONFIG_PATTERN.exec(res.data);
 
   if (!match) {
