@@ -41,6 +41,30 @@ export async function fetchYears(): Promise<NardYear[]> {
   return years.filter((year) => year.locations?.length);
 }
 
+/** The same country is written differently from one year to the next. */
+const COUNTRY_ALIASES: Record<string, string> = {
+  uk: "united kingdom",
+  usa: "united states",
+  us: "united states",
+  uae: "united arab emirates",
+};
+
+/**
+ * A comparable key for a location, so "London, UK" and "London, United
+ * Kingdom" are recognised as the same place while "London, Canada" is not.
+ */
+function locationKey(name: string): string {
+  const parts = name
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[̀-ͯ]/g, "")
+    .split(",")
+    .map((part) => part.replace(/[^a-z ]/g, "").trim())
+    .filter(Boolean);
+
+  return parts.map((part) => COUNTRY_ALIASES[part] ?? part).join(", ");
+}
+
 /**
  * Flatten the most recent years into one deduplicated set of events.
  *
@@ -57,25 +81,27 @@ export function toEvents(years: NardYear[]): Chapter[] {
 
   for (const year of recent) {
     for (const location of year.locations ?? []) {
-      const key = location.name.trim().toLowerCase();
+      const key = locationKey(location.name);
 
       if (byName.has(key)) {
         continue;
       }
+
+      const page = year.pageLink ?? SOURCE_URL;
 
       byName.set(key, {
         ID: id++,
         FacebookID: 0,
         Name: location.name.trim(),
         Flag: "",
-        FbURL: year.pageLink ?? SOURCE_URL,
+        FbURL: page,
         TwitterURL: "",
         InstaURL: "",
         Email: "",
         Region: "",
-        Year: year.year,
         Lat: location.lat,
         Lng: location.lng,
+        description: `National Animal Rights Day ${year.year}\n${page}`,
       });
     }
   }

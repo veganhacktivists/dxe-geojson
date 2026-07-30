@@ -3,15 +3,6 @@ import { Request, Response } from "express";
 import { toGeoJson, Chapter } from "../lib/geojson";
 
 /**
- * Chapters the API reports as online get 0,0, which would otherwise pin them
- * off the coast of Africa. Ones that do meet somewhere are placed here; the
- * rest are left off the map.
- */
-const COORDINATES: Record<string, [number, number]> = {
-  "Animal Liberation Conference": [38.9072, -77.0369], // Washington, DC
-};
-
-/**
  * Fetch DxE chapters and parse the response to JSON.
  */
 async function fetchChapters(): Promise<Chapter[]> {
@@ -22,22 +13,14 @@ async function fetchChapters(): Promise<Chapter[]> {
 
 /**
  * Whether a chapter has coordinates that put it somewhere real.
+ *
+ * Chapters DxE marks as online come back at 0,0, which would otherwise pin
+ * them in the Gulf of Guinea. That includes the Animal Liberation Conference,
+ * which moves each year — Washington County (Utah) in 2022, Berkeley in 2023,
+ * Madison in 2024, Santa Rosa in 2025 — so there is no location to give it.
  */
 function isPlaced(chapter: Chapter): boolean {
   return Math.abs(chapter.Lat) > 0.5 || Math.abs(chapter.Lng) > 0.5;
-}
-
-/**
- * Apply a known location to a chapter the API left at 0,0.
- */
-function place(chapter: Chapter): Chapter {
-  const known = COORDINATES[String(chapter.Name)];
-
-  if (!known || isPlaced(chapter)) {
-    return chapter;
-  }
-
-  return { ...chapter, Lat: known[0], Lng: known[1] };
 }
 
 /**
@@ -51,7 +34,7 @@ export default async function getChapters(_req: Request, res: Response) {
   try {
     const chapters = await fetchChapters();
 
-    res.status(200).json(chapters.map(place).filter(isPlaced).map(toGeoJson));
+    res.status(200).json(chapters.filter(isPlaced).map(toGeoJson));
   } catch (err) {
     res.status(500).json({ error: "" });
   }
