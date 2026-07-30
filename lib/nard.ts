@@ -130,7 +130,6 @@ export function toEvents(years: NardYear[]): Chapter[] {
 
   const byName = new Map<string, Chapter>();
   const seenPlaces = new Set<string>();
-  let id = 1;
 
   for (const year of recent) {
     for (const location of year.locations ?? []) {
