@@ -26,6 +26,22 @@ interface NardYear {
 }
 
 /**
+ * Whether a location can be put on the map.
+ *
+ * A location the source lists without a name or with coordinates it did not
+ * fill in would otherwise become a nameless pin, or one placed at NaN.
+ */
+function isMappable(location: NardLocation): boolean {
+  return (
+    Boolean(location?.name?.trim()) &&
+    Number.isFinite(location.lat) &&
+    Number.isFinite(location.lng) &&
+    Math.abs(location.lat) <= 90 &&
+    Math.abs(location.lng) <= 180
+  );
+}
+
+/**
  * Read the year explorer config out of the NARD homepage.
  *
  * The config carries every year they have run, each with its own page and a
@@ -43,7 +59,12 @@ export async function fetchYears(): Promise<NardYear[]> {
   }
 
   const years = (JSON.parse(match[1]).years ?? []) as NardYear[];
-  const usable = years.filter((year) => year.locations?.length);
+  const usable = years
+    .map((year) => ({
+      ...year,
+      locations: (year.locations ?? []).filter(isMappable),
+    }))
+    .filter((year) => year.locations.length);
 
   // Returning nothing would empty the layer on the map, and an empty response
   // is indistinguishable from a page we can no longer read, so treat it as a
@@ -113,6 +134,10 @@ export function toEvents(years: NardYear[]): Chapter[] {
 
   for (const year of recent) {
     for (const location of year.locations ?? []) {
+      if (!isMappable(location)) {
+        continue;
+      }
+
       const key = locationKey(location.name);
       // Identical coordinates mean the same place spelled two ways — "Tucson,
       // AZ" and "Tuscon, AZ" are both listed. Nearby-but-distinct towns keep
