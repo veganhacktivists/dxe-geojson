@@ -103,15 +103,7 @@ export function toEvents(years: NardYear[]): Chapter[] {
       const page = year.pageLink ?? SOURCE_URL;
 
       byName.set(key, {
-        ID: id++,
-        FacebookID: 0,
         Name: location.name.trim(),
-        Flag: "",
-        FbURL: page,
-        TwitterURL: "",
-        InstaURL: "",
-        Email: "",
-        Region: "",
         Lat: location.lat,
         Lng: location.lng,
         description: `National Animal Rights Day ${year.year}\n${page}`,

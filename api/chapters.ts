@@ -29,18 +29,24 @@ function isPlaced(chapter: Chapter): boolean {
 }
 
 /**
- * Gather whatever contact links a chapter has into one field.
+ * Reduce a chapter to what the map shows.
  *
- * The map shows a chapter's own `FbURL`, `InstaURL` and so on as separate
- * rows, which leaves a blank row wherever a chapter lacks one. Collecting them
- * lets the map display a single field and show only the links that exist.
+ * The popup lists one row per property it receives, so `FbURL`, `InstaURL` and
+ * the rest each leave an empty row wherever a chapter lacks one. Gathering the
+ * links into `description` shows only the ones that exist, and dropping the
+ * internal identifiers keeps the popup to what a visitor needs.
  */
-function withDescription(chapter: Chapter): Chapter {
+function forDisplay(chapter: Chapter): Chapter {
   const links = [chapter.FbURL, chapter.InstaURL, chapter.TwitterURL, chapter.Email]
     .map((value) => String(value ?? "").trim())
     .filter(Boolean);
 
-  return { ...chapter, description: links.join("\n") };
+  return {
+    Name: chapter.Name,
+    Lat: chapter.Lat,
+    Lng: chapter.Lng,
+    description: links.join("\n"),
+  };
 }
 
 /**
@@ -56,7 +62,7 @@ export default async function getChapters(_req: Request, res: Response) {
 
     res
       .status(200)
-      .json(chapters.filter(isPlaced).map(withDescription).map(toGeoJson));
+      .json(chapters.filter(isPlaced).map(forDisplay).map(toGeoJson));
   } catch (err) {
     res.status(500).json({ error: "" });
   }
