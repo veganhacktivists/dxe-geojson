@@ -42,9 +42,34 @@ export async function fetchYears(): Promise<NardYear[]> {
     throw new Error("No year explorer config found on thenard.org");
   }
 
-  const years = JSON.parse(match[1]).years as NardYear[];
+  const years = (JSON.parse(match[1]).years ?? []) as NardYear[];
+  const usable = years.filter((year) => year.locations?.length);
 
-  return years.filter((year) => year.locations?.length);
+  // Returning nothing would empty the layer on the map, and an empty response
+  // is indistinguishable from a page we can no longer read, so treat it as a
+  // failure and let the caller fall back.
+  if (!usable.length) {
+    throw new Error("No years with locations found on thenard.org");
+  }
+
+  return usable;
+}
+
+/**
+ * Reshape a snapshot event to what the map displays.
+ *
+ * The committed snapshot predates the trimmed property set, so mapping it
+ * straight through would put the old thirteen-row popup back and, because the
+ * map adds a field for every property it receives, leave those fields behind
+ * once the live source recovers.
+ */
+export function fromSnapshot(event: Record<string, unknown>): Chapter {
+  return {
+    Name: String(event.Name ?? ""),
+    Lat: Number(event.Lat),
+    Lng: Number(event.Lng),
+    description: String(event.FbURL ?? SOURCE_URL),
+  };
 }
 
 /** The same country is written differently from one year to the next. */

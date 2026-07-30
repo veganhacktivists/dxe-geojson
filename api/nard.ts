@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { toGeoJson } from "../lib/geojson";
-import { fetchYears, toEvents } from "../lib/nard";
+import { fetchYears, fromSnapshot, toEvents } from "../lib/nard";
 import fallback from "../data/nard.json" with { type: "json" };
 
 /**
@@ -22,6 +22,6 @@ export default async function getEvents(_req: Request, res: Response) {
   } catch (err) {
     console.error("Falling back to the committed NARD snapshot:", err);
 
-    res.status(200).json(fallback.map(toGeoJson));
+    res.status(200).json(fallback.map(fromSnapshot).map(toGeoJson));
   }
 }
