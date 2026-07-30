@@ -77,15 +77,22 @@ export function toEvents(years: NardYear[]): Chapter[] {
     .slice(0, YEARS_PUBLISHED);
 
   const byName = new Map<string, Chapter>();
+  const seenPlaces = new Set<string>();
   let id = 1;
 
   for (const year of recent) {
     for (const location of year.locations ?? []) {
       const key = locationKey(location.name);
+      // Identical coordinates mean the same place spelled two ways — "Tucson,
+      // AZ" and "Tuscon, AZ" are both listed. Nearby-but-distinct towns keep
+      // their own pins because their coordinates differ.
+      const place = `${location.lat},${location.lng}`;
 
-      if (byName.has(key)) {
+      if (byName.has(key) || seenPlaces.has(place)) {
         continue;
       }
+
+      seenPlaces.add(place);
 
       const page = year.pageLink ?? SOURCE_URL;
 
