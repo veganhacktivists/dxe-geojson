@@ -24,6 +24,21 @@ function isPlaced(chapter: Chapter): boolean {
 }
 
 /**
+ * Gather whatever contact links a chapter has into one field.
+ *
+ * The map shows a chapter's own `FbURL`, `InstaURL` and so on as separate
+ * rows, which leaves a blank row wherever a chapter lacks one. Collecting them
+ * lets the map display a single field and show only the links that exist.
+ */
+function withDescription(chapter: Chapter): Chapter {
+  const links = [chapter.FbURL, chapter.InstaURL, chapter.TwitterURL, chapter.Email]
+    .map((value) => String(value ?? "").trim())
+    .filter(Boolean);
+
+  return { ...chapter, description: links.join("\n") };
+}
+
+/**
  * Fetch DxE chapters and convert them to GeoJSON objects.
  *
  * @todo Set cache headers.
@@ -34,7 +49,9 @@ export default async function getChapters(_req: Request, res: Response) {
   try {
     const chapters = await fetchChapters();
 
-    res.status(200).json(chapters.filter(isPlaced).map(toGeoJson));
+    res
+      .status(200)
+      .json(chapters.filter(isPlaced).map(withDescription).map(toGeoJson));
   } catch (err) {
     res.status(500).json({ error: "" });
   }
