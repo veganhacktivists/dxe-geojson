@@ -4,12 +4,13 @@ Simple proxy for the DxE chapters API, converted into GeoJSON. Used on [animalri
 
 ## Deployment
 
-We're using a serverless setup hosted on [Vercel], using Stephan's personal
-account. If this needs to be deployed, shoot him a message. You can also deploy
-this yourself using a different URL:
+It runs on Coolify as `animalrightsmap-dxe-geojson-proxy`, in the Animal Rights
+Map project, and serves https://dxe-geojson.animalrightsmap.org. Every push to
+`main` deploys it.
 
-- `$ yarn global add vercel`
-- `$ vercel`
+To run it locally:
+
+- `$ pnpm install`
+- `$ pnpm dev`
 
 [animalrightsmap.org]: https://animalrightsmap.org
-[vercel]: https://vercel.com
