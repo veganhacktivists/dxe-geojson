@@ -1,5 +1,5 @@
 [phases.setup]
-nixpkgsArchive = '5b751d1b50366c18fc5ef7faa82f5d4d2b75ef47'
+nixpkgsArchive = 'fb122f52ed3bc13fb7dcfb217a437e19219a125e'
 nixpkgs = [
   "nodejs_22",
   "..."
